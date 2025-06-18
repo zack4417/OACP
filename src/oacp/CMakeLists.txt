@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(consensus_bphto)
+project(oacp)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,7 +32,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 # catkin_package(
 #   INCLUDE_DIRS include
-#   LIBRARIES consensus_bphto_node_lib
+#   LIBRARIES oacp_node_lib
 #   CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs nav_msgs
 #   DEPENDS eigen-quadprog yaml-cpp
 # )
@@ -54,7 +54,7 @@ generate_messages(
 
 catkin_package(
   INCLUDE_DIRS include
-  LIBRARIES consensus_bphto_node_lib
+  LIBRARIES oacp_node_lib
   CATKIN_DEPENDS roscpp rospy std_msgs geometry_msgs nav_msgs
 )
 
@@ -66,15 +66,15 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-add_library(consensus_bphto_node_lib src/optim_consensus.cpp)
-target_link_libraries(consensus_bphto_node_lib ${catkin_LIBRARIES} eigen-quadprog)
+add_library(oacp_node_lib src/optim_consensus.cpp)
+target_link_libraries(oacp_node_lib ${catkin_LIBRARIES} eigen-quadprog)
 
-add_executable(consensus_bphto_node src/main_consensus.cpp)
-target_link_libraries(consensus_bphto_node consensus_bphto_node_lib ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES})
+add_executable(oacp_node src/main_consensus.cpp)
+target_link_libraries(oacp_node oacp_node_lib ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES})
 
  
 
-# install(TARGETS consensus_bphto_node consensus_bphto_node_lib
+# install(TARGETS oacp_node oacp_node_lib
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 # )

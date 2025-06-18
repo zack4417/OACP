@@ -28,7 +28,7 @@ If you use this code in your research, please cite:
 ```
 .
 ├── src/
-│   ├── consensus_bphto/              # Implementation of OACP approach
+│   ├── oacp/              # Implementation of oacp approach
 │   │   ├── python_env/               # Highway driving simulator
 │   │   │   ├── mesh/                 # 3D building models for visualization
 │   │   │   └── highway_car2.py       # Main simulator script
@@ -48,7 +48,7 @@ If you use this code in your research, please cite:
   - [NGSIM I-80 Dataset](https://drive.google.com/drive/folders/1cgsOWnc4JTeyNdBN6Fjef2-J5HqjnWyX?usp=sharing)
   ```bash
   # Place downloaded files in:
-  ros_ws/src/consensus_bphto/python_env/highway/
+  ros_ws/src/oacp/python_env/highway/
   ```
 
 ## Installation
@@ -58,7 +58,7 @@ mkdir -p ~/ros_ws/src
 cd ~/ros_ws/src
 
 # Clone repository
-git clone https://github.com/yourusername/consensus_bphto.git
+git clone https://github.com/yourusername/oacp.git
 
 # Build package
 cd ~/ros_ws
@@ -81,14 +81,21 @@ delta_time: 0.05    # Simulation timestep
 ## Usage
 Terminal 1 (Planning Node):
 ```bash
-rosrun consensus_bphto consensus_bphto_node
+source devel/setup.bash
+rosrun oacp oacp_node
 ```
 
 Terminal 2 (Simulator):
 ```bash
-rosrun consensus_bphto highway_car2.py
+source devel/setup.bash
+rosrun oacp highway_car2.py
 ```
 
+Terminal 3 (Visualization):
+```bash
+source devel/setup.bash
+rosrun rviz rviz -d src/config.rviz 
+``` 
 ## Visualizing Results
 The simulator provides RVIZ visualization with:
 - Vehicle trajectories
@@ -103,10 +110,10 @@ In `highway_car2.py`, use absolute paths for meshes. Replace `[YOUR_USERNAME]` w
 
 ```python
 # For house obstacles 1-3
-roof_marker.mesh_resource = "file:///home/[YOUR_USERNAME]/ros_ws/src/consensus_bphto/python_env/mesh/t.stl"
+roof_marker.mesh_resource = "file:///home/[YOUR_USERNAME]/ros_ws/src/oacp/python_env/mesh/t.stl"
 
 # For house obstacle 4
-roof_marker.mesh_resource = "file:///home/[YOUR_USERNAME]/ros_ws/src/consensus_bphto/python_env/mesh/tt.stl"
+roof_marker.mesh_resource = "file:///home/[YOUR_USERNAME]/ros_ws/src/oacp/python_env/mesh/tt.stl"
 ```
 
 ## Contributing

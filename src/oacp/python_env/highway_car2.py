@@ -19,7 +19,7 @@ from shapely.affinity import scale, rotate
 import rospy
 from visualization_msgs.msg import Marker, MarkerArray  
 from geometry_msgs.msg import Point, Quaternion, Twist, Vector3, TransformStamped
-from consensus_bphto.msg import States, Controls  
+from oacp.msg import States, Controls  
 from tf.transformations import quaternion_from_euler
 
 
@@ -351,7 +351,7 @@ class MinimalSubscriber:
                 self.obs[0,:4]=[-5, -2, 15.0, 0.0] 
 
             print("READING DATA........")
-            self.ngsim_obs = np.genfromtxt('src/consensus_bphto/'+file,delimiter=',') # id x y psi length width vx vy  time
+            self.ngsim_obs = np.genfromtxt('src/oacp/'+file,delimiter=',') # id x y psi length width vx vy  time
             mask = self.ngsim_obs[:,8] == np.round(self.time_shift, 2) # 2 for data0
             ngsim_obs = self.ngsim_obs[mask,:]
             
@@ -579,7 +579,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/consensus_bphto/python_env/mesh/t.stl"
+        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/oacp/python_env/mesh/t.stl"
 
         # Position and scale the roof mesh
         roof_marker.pose.position = position
@@ -615,7 +615,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/consensus_bphto/python_env/mesh/t.stl"
+        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/oacp/python_env/mesh/t.stl"
 
         # Position and scale the roof mesh
         roof_marker.pose.position = position
@@ -654,7 +654,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/consensus_bphto/python_env/mesh/t.stl"
+        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/oacp/python_env/mesh/t.stl"
 
         # Position and scale the roof mesh
         roof_marker.pose.position = position
@@ -694,7 +694,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/consensus_bphto/python_env/mesh/tt.stl"
+        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/oacp/python_env/mesh/tt.stl"
         # Position and scale the roof mesh
         roof_marker.pose.position = position
         roof_marker.pose.position.z += 4.0  # Add 2 meters to the Z position (altitude)

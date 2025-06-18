@@ -17,9 +17,9 @@
 #include <ros/ros.h>
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/Pose.h>
-#include "consensus_bphto/consensus_bphto.h" 
-#include <consensus_bphto/Controls.h>
-#include <consensus_bphto/States.h>
+#include "oacp/oacp.h" 
+#include <oacp/Controls.h>
+#include <oacp/States.h>
 using namespace std;
 using namespace optim;
 using std::placeholders::_1; 
@@ -45,8 +45,8 @@ class MinimalPublisher {
         Eigen::Array<bool, Eigen::Dynamic, 1> mask_max, mask_min; 
         MinimalPublisher(); 
   private:
-    void TopicCallback(const consensus_bphto::States::ConstPtr& msg);
-    void VelocityBoundary(const consensus_bphto::States::ConstPtr& msg);
+    void TopicCallback(const oacp::States::ConstPtr& msg);
+    void VelocityBoundary(const oacp::States::ConstPtr& msg);
     void TimerCallback(const ros::TimerEvent&);
     void SafetyAdjustment();
     void CandidateEvaluation();
@@ -66,7 +66,7 @@ MinimalPublisher::MinimalPublisher(): count_(0) {
         ros::NodeHandle nh;
         subscription_ = nh.subscribe("ego_vehicle_obs", 10, &MinimalPublisher::TopicCallback, this);
         // subscription_vx_bound_ = nh.subscribe("ego_vehicle_vel_bound", 10, &MinimalPublisher::TopicVelCallback, this);
-        publisher_ = nh.advertise<consensus_bphto::Controls>("ego_vehicle_cmds", 10);
+        publisher_ = nh.advertise<oacp::Controls>("ego_vehicle_cmds", 10);
         timer_ = nh.createTimer(ros::Duration(0.01), &MinimalPublisher::TimerCallback, this);
  
         cnt = 1;
@@ -74,9 +74,9 @@ MinimalPublisher::MinimalPublisher(): count_(0) {
  
         Gotit = false;
         warm = true;
-        YAML::Node map = YAML::LoadFile("src/consensus_bphto/config.yaml");
+        YAML::Node map = YAML::LoadFile("src/oacp/config.yaml");
 
-        // YAML::Node map1 = YAML::LoadFile("src/consensus_bphto/config.yaml"); 
+        // YAML::Node map1 = YAML::LoadFile("src/oacp/config.yaml"); 
         string setting = map["setting"].as<string>();
         pto_data.alpha_admm = 1.0; //  1.5
         pto_data.num_goal = map["configuration"][setting]["goal"].as<float>();
@@ -357,7 +357,7 @@ void MinimalPublisher:: SafetyAdjustment() {
 
 
  
-void MinimalPublisher::VelocityBoundary(const consensus_bphto::States::ConstPtr& msg) { 
+void MinimalPublisher::VelocityBoundary(const oacp::States::ConstPtr& msg) { 
     ROS_INFO("Received a vel boundary msg");  
     pto_data.vxc_max  = msg->vxc_max;
     pto_data.vxc1_max  = msg->vxc1_max;
@@ -411,7 +411,7 @@ void MinimalPublisher::VelocityBoundary(const consensus_bphto::States::ConstPtr&
         'h' );
 }
 
-void MinimalPublisher::TopicCallback(const consensus_bphto::States::ConstPtr& msg) { 
+void MinimalPublisher::TopicCallback(const oacp::States::ConstPtr& msg) { 
     // ROS_INFO("Received a message");  
     x_init = msg->x[0];
     y_init = msg->y[0];
@@ -599,7 +599,7 @@ void MinimalPublisher :: Goalfilter() {
 }
  
 void MinimalPublisher :: TimerCallback(const ros::TimerEvent&) {
-    auto message = consensus_bphto::Controls();   
+    auto message = oacp::Controls();   
     if(Gotit) {  
         // cout << "Gotit msg" << Gotit << endl;     
         // ROS_INFO("Gotit msg: %s", Gotit ? "true" : "false");

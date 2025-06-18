@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>consensus_bphto</name>
+  <name>oacp</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
   <maintainer email="zack44170625@gmail.com">vivek</maintainer>
