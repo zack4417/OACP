@@ -1,0 +1,43 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "${default}",
+        "limitSymbolsToIncludedHeaders": false
+      },
+      "includePath": [
+        "/home/zack/Documents/ros_ws/AV_ws/devel/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/devel/include/**",
+        "/opt/ros/noetic/include/**",
+        "/home/zack/catkin_ws/devel/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/planner/bspline_opt/include/**",
+        "/home/zack/Documents/ros_ws/AV_ws/src/consensus_bphto/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/planner/plan_manage/include/**",
+        "/home/zack/catkin_ws/src/mav_comm/mav_msgs/include/**",
+        "/home/zack/catkin_ws/src/mav_comm/mav_planning_msgs/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/uav_simulator/mockamap/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/uav_simulator/Utils/multi_map_server/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/orca_pkg/orca/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/planner/path_searching/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/planner/plan_env/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/uav_simulator/Utils/pose_utils/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/uav_simulator/Utils/quadrotor_msgs/include/**",
+        "/home/zack/catkin_ws/src/rotors_simulator/rotors_control/include/**",
+        "/home/zack/catkin_ws/src/rotors_simulator/rotors_gazebo_plugins/include/**",
+        "/home/zack/catkin_ws/src/rotors_simulator/rotors_hil_interface/include/**",
+        "/home/zack/catkin_ws/src/rotors_simulator/rotors_joy_interface/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/uav_simulator/so3_control/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/uav_simulator/so3_quadrotor_simulator/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/planner/traj_utils/include/**",
+        "/home/zack/Downloads/ros_ws/multiagent-collision-avoidance/src/uav_simulator/Utils/uav_utils/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS",
+      "intelliSenseMode": "gcc-x64",
+      "compilerPath": "/usr/bin/gcc",
+      "cStandard": "gnu11",
+      "cppStandard": "c++14"
+    }
+  ],
+  "version": 4
+}

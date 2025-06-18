@@ -1,0 +1,9 @@
+float64[] x
+float64[] y
+float64[] vx
+float64[] vy
+float64[] psi
+float64 psidot
+float64 vxc_max
+float64 vxc1_max
+float64 vxc_min

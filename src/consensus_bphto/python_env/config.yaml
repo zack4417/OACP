@@ -1,0 +1,3 @@
+obstacles: dynamic #static dynamic
+num_obs: 4
+delta_time: 0.1
