@@ -439,7 +439,7 @@ namespace optim {
      */
     four_var ComputeBernstein(ArrayXXf tot_time, float t_fin, int num);
 
-    // --- Optimization and MPC Functions ---
+    // --- Optimization and OACP Functions ---
 
     /**
      * @brief Solves the optimization problem.
@@ -501,7 +501,7 @@ namespace optim {
                            ArrayXXf psi_temp, ArrayXXf b_eq_psi);
 
     /**
-     * @brief Implements the Model Predictive Control (MPC) loop.
+     * @brief Implements the OACP loop.
      * @param pto_data The problem data structure.
      * @param PPP A `four_var` struct likely containing Bernstein matrices (P, Pdot, Pddot, Pdddot).
      * @param x_g Goal x positions.
@@ -514,9 +514,9 @@ namespace optim {
      * @param psi_init Current initial heading angle.
      * @param psidot_init Current initial heading rate.
      * @param warm Flag indicating whether to use a warm start.
-     * @return The updated `probData` structure after one MPC step.
+     * @return The updated `probData` structure after one OACP step.
      */
-    probData cpto(probData pto_data, four_var PPP, ArrayXXf x_g, ArrayXXf y_g,
+    probData OACP(probData pto_data, four_var PPP, ArrayXXf x_g, ArrayXXf y_g,
                  float x_init, float y_init, float v_init, float ax_init, float ay_init,
                  float psi_init, float psidot_init, bool warm);
 

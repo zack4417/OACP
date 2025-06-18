@@ -618,7 +618,7 @@ void MinimalPublisher :: TimerCallback(const ros::TimerEvent&) {
         // }
   
  
-        pto_data = cpto(pto_data, PPP, x_g, y_g, x_init, y_init, v_init, ax_init, ay_init, psi_init, psidot_init, warm);
+        pto_data = OACP(pto_data, PPP, x_g, y_g, x_init, y_init, v_init, ax_init, ay_init, psi_init, psidot_init, warm);
         end = clock(); 
         // GetRanks();
         // cout << "111" << endl;

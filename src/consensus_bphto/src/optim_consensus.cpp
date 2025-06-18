@@ -751,7 +751,7 @@ namespace optim {
 		return s; 
 	}
 	
-	probData cpto(probData pto_data, four_var PPP, ArrayXXf x_g, ArrayXXf y_g, float x_init, float y_init, float v_init, float ax_init,  float ay_init, float psi_init, float psidot_init, bool warm) {
+	probData OACP(probData pto_data, four_var PPP, ArrayXXf x_g, ArrayXXf y_g, float x_init, float y_init, float v_init, float ax_init,  float ay_init, float psi_init, float psidot_init, bool warm) {
 		four_var s;
 		// if(warm)
 		{
