@@ -142,19 +142,7 @@ namespace optim {
 		double number = dis(gen);
         return clip3(mean - stddev, mean + stddev, number);
     }
-	// // Function to generate a random number with Gaussian distribution constrained to [mean - stddev, mean + stddev]
-	// double generate_constrained_random(double mean, double stddev) {
-	// 	static std::random_device rd;
-	// 	static std::mt19937 gen(rd());
-	// 	std::normal_distribution<> dis(mean, stddev);
-		
-	// 	double number;
-	// 	do {
-	// 		number = dis(gen);
-	// 	} while (number < (mean - stddev) || number > (mean + stddev));
-		
-	// 	return number;
-	// }
+ 
 		
 	ArrayXXf arctan2(ArrayXXf arr1, ArrayXXf arr2) {
 		ArrayXXf temp(arr1.rows(), arr1.cols());
@@ -193,31 +181,7 @@ namespace optim {
 	float safety_dist(float x1, float y1, float x2, float y2) {
 		return (pow((x1 - x2)/ 5.6, 2) + pow((y1 - y2)/ 3.0, 2) -1);
 	}
-	// // Function to compute the adaptive coefficient for rho based on residual balancing
-	// double compute_coefficient_rho(double primal_residual, double dual_residual, double tau_increase = 2.0, double tau_decrease = 2.0) {
-	// 	if (primal_residual > 10 * dual_residual) {
-	// 		return tau_increase;  // Increase rho if primal residual is significantly larger
-	// 	} else if (dual_residual > 10 * primal_residual) {
-	// 		return 1.0 / tau_decrease;  // Decrease rho if dual residual is significantly larger
-	// 	}
-	// 	return 1.0;  // Keep rho unchanged if residuals are balanced
-	// }
-
-	// // Update penalty parameters with the computed coefficient
-	// void update_penalty_parameters(double primal_residual, double dual_residual, PTOData& pto_data) {
-	// 	double coefficient_rho = compute_coefficient_rho(primal_residual, dual_residual);
-
-	// 	pto_data.rho_psi *= coefficient_rho;
-	// 	pto_data.rho_obs *= coefficient_rho;
-	// 	pto_data.rho_lateral_long *= coefficient_rho;
-	// 	pto_data.rho_vel *= coefficient_rho;
-	// 	pto_data.rho_acc *= coefficient_rho;
-	// 	pto_data.rho_jerk *= coefficient_rho;
-
-	// 	// Optionally log or print the updated values for debugging
-	// 	std::cout << "Updated penalty parameters with coefficient_rho: " << coefficient_rho << std::endl;
-	// }	 
-		
+  
   	four_var BernsteinCoeffOrder10(float n, float tmin, float tmax, ArrayXXf t_actual, int num) {
 		four_var s;
 		float l = tmax - tmin;
@@ -273,48 +237,7 @@ namespace optim {
   
 		return s;
 	}
-	three_var bernstein_coeff_order10_new(float n, float tmin, float tmax, ArrayXXf t_actual, int num) {
-		three_var s;
-		float l = tmax - tmin;
-		ArrayXXf t = (t_actual - tmin) / l;
-
-		ArrayXXf P(num, (int)n + 1), Pdot(num, (int)n + 1), Pddot(num, (int)n + 1);
-
-		for (int i = 0; i <= n; ++i) { 
-			float coeff = binomialCoeff(n, i); 
-			P.col(i) = coeff * pow(1 - t, n - i) * pow(t, i); 
-		}  
-		  
-		Pdot.col(0) = -10.0 * pow(-t + 1, 9); 
-		Pdot.col(1) = -90.0 * t * pow(-t + 1, 8) + 10.0 * pow(-t + 1, 9); 
-		Pdot.col(2) = -360.0 * pow(t, 2) * pow(-t + 1, 7) + 90.0 * t * pow(-t + 1, 8); 
-		Pdot.col(3) = -840.0 * pow(t, 3) * pow(-t + 1, 6) + 360.0 * pow(t, 2) * pow(-t + 1, 7); 
-		Pdot.col(4) = -1260.0 * pow(t, 4) * pow(-t + 1, 5) + 840.0 * pow(t, 3) * pow(-t + 1, 6); 
-		Pdot.col(5) = -1260.0 * pow(t, 5) * pow(-t + 1, 4) + 1260.0 * pow(t, 4) * pow(-t + 1, 5); 
-		Pdot.col(6) = -840.0 * pow(t, 6) * pow(-t + 1, 3) + 1260.0 * pow(t, 5) * pow(-t + 1, 4); 
-		Pdot.col(7) = -360.0 * pow(t, 7) * pow(-t + 1, 2) + 840.0 * pow(t, 6) * pow(-t + 1, 3); 
-		Pdot.col(8) = 45.0 * pow(t, 8) * (2 * t - 2) + 360.0 * pow(t, 7) * pow(-t + 1, 2); 
-		Pdot.col(9) = -10.0 * pow(t, 9) + 9 * pow(t, 8) * (-10.0 * t + 10.0); 
-		Pdot.col(10) = 10.0 * pow(t, 9); 
-  
-		Pddot.col(0) = 90.0 * pow(-t + 1, 8.0); 
-		Pddot.col(1) = 720.0 * t * pow(-t + 1, 7) - 180.0 * pow(-t + 1, 8); 
-		Pddot.col(2) = 2520.0 * pow(t, 2) * pow(-t + 1, 6) - 1440.0 * t * pow(-t + 1, 7) + 90.0 * pow(-t + 1, 8); 
-		Pddot.col(3) = 5040.0 * pow(t, 3) * pow(-t + 1, 5) - 5040.0 * pow(t, 2) * pow(-t + 1, 6) + 720.0 * t * pow(-t + 1, 7); 
-		Pddot.col(4) = 6300.0 * pow(t, 4) * pow(-t + 1, 4) - 10080.0 * pow(t, 3) * pow(-t + 1, 5) + 2520.0 * pow(t, 2) * pow(-t + 1, 6); 
-		Pddot.col(5) = 5040.0 * pow(t, 5) * pow(-t + 1, 3) - 12600.0 * pow(t, 4) * pow(-t + 1, 4) + 5040.0 * pow(t, 3) * pow(-t + 1, 5); 
-		Pddot.col(6) = 2520.0 * pow(t, 6) * pow(-t + 1, 2) - 10080.0 * pow(t, 5) * pow(-t + 1, 3) + 6300.0 * pow(t, 4) * pow(-t + 1, 4); 
-		Pddot.col(7) = -360.0 * pow(t, 7) * (2 * t - 2) - 5040.0 * pow(t, 6) * pow(-t + 1, 2) + 5040.0 * pow(t, 5) * pow(-t + 1, 3); 
-		Pddot.col(8) = 90.0 * pow(t, 8) + 720.0 * pow(t, 7) * (2 * t - 2) + 2520.0 * pow(t, 6) * pow(-t + 1, 2); 
-		Pddot.col(9) = -180.0 * pow(t, 8) + 72 * pow(t, 7) * (-10.0 * t + 10.0); 
-		Pddot.col(10) = 90.0 * pow(t, 8); 
- 
-		s.a = P;
-		s.b = Pdot / l;
-		s.c = Pddot / (l * l);
-
-		return s;
-	}
+	 
 	probData solve(probData pto_data, ArrayXXf P, ArrayXXf Pdot, ArrayXXf Pddot, ArrayXXf Pdddot, ArrayXXf x_init, ArrayXXf x_fin, ArrayXXf y_init, ArrayXXf y_fin, ArrayXXf v_init,  ArrayXXf ax_init, ArrayXXf ay_init,  ArrayXXf psi_init, ArrayXXf psidot_init, ArrayXXf psi_fin, ArrayXXf psidot_fin, ArrayXXf x_obs, ArrayXXf y_obs, bool warm ) {
         pto_data.rho_consensus_psi = rho- 0;        
 		pto_data.rho_consensus_x = rho - 0;
@@ -389,18 +312,14 @@ namespace optim {
 			// Update consensus variable s   
 			// Calculate and expand averages, then extract the first Nc rows to s_consensus
 			pto_data.s_consensus_psi = pto_data.psi.transpose().matrix().rowwise().mean().replicate(1, pto_data.psi.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
-			// pto_data.s_consensus_x = pto_data.x.transpose().matrix().rowwise().mean().replicate(1, pto_data.x.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
-			// pto_data.s_consensus_y = pto_data.y.transpose().matrix().rowwise().mean().replicate(1, pto_data.y.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
-		    pto_data.s_consensus_x.block(0, 0, pto_data.num_consensus, pto_data.num_goal)  = pto_data.x.transpose().matrix().rowwise().mean().replicate(1, pto_data.x.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
+ 		    pto_data.s_consensus_x.block(0, 0, pto_data.num_consensus, pto_data.num_goal)  = pto_data.x.transpose().matrix().rowwise().mean().replicate(1, pto_data.x.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
 		    pto_data.s_consensus_x.block(pto_data.num_consensus, 0, pto_data.num_consensus, pto_data.num_goal)  = pto_data.xdot.transpose().matrix().rowwise().mean().replicate(1, pto_data.xdot.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
 		    pto_data.s_consensus_x.block(2 *pto_data.num_consensus, 0, pto_data.num_consensus, pto_data.num_goal)  = pto_data.xddot.transpose().matrix().rowwise().mean().replicate(1, pto_data.xddot.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
   			pto_data.s_consensus_y.block(0, 0, pto_data.num_consensus, pto_data.num_goal)  = pto_data.y.transpose().matrix().rowwise().mean().replicate(1, pto_data.y.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
 		    pto_data.s_consensus_y.block(pto_data.num_consensus, 0, pto_data.num_consensus, pto_data.num_goal)  = pto_data.ydot.transpose().matrix().rowwise().mean().replicate(1, pto_data.ydot.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
 		    pto_data.s_consensus_y.block(2 *pto_data.num_consensus, 0, pto_data.num_consensus, pto_data.num_goal)  = pto_data.yddot.transpose().matrix().rowwise().mean().replicate(1, pto_data.yddot.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
 
-			// pto_data.s_consensus_psi.block(pto_data.num_consensus, 0, pto_data.num_consensus, pto_data.num_goal) = pto_data.psidot.transpose().matrix().rowwise().mean().replicate(1, pto_data.psidot.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
-			// pto_data.s_consensus_psi.block(2 * pto_data.num_consensus, 0, pto_data.num_consensus, pto_data.num_goal) = pto_data.psiddot.transpose().matrix().rowwise().mean().replicate(1, pto_data.psiddot.cols()).topRows(pto_data.num_consensus).leftCols(pto_data.num_goal);
-			// Print s_consensus N_consensus/5 
+	 
 			// obs
 			ArrayXXf wc_alpha(pto_data.num_goal, pto_data.num_obs*pto_data.num);
 			ArrayXXf ws_alpha(pto_data.num_goal, pto_data.num_obs*pto_data.num);
@@ -430,27 +349,16 @@ namespace optim {
 			//lateral road boundaries
    			// position_box_constraints_res
  			long_pos =  pto_data.A_lateral_long.matrix() * c_x.transpose().matrix(); 
- 		  	// over relaxed ADMM
+ 		  	//  ADMM
 			pto_data.s_x_ineq = (- pto_data.alpha_admm * ((pto_data.A_lateral_long.matrix() * c_x.transpose().matrix()).array() - pto_data.b_longitudinal_ineq)
 								+ (1-pto_data.alpha_admm)*pto_data.s_x_ineq_old).max(0.0); //if the value inside the parentheses is less than 0.0, it will be replaced with 0.0. If it is greater than or equal to 0.0, it will remain the same.
  
 		    b_lateral_min = pto_data.lateral_min * ArrayXXf :: Ones(pto_data.num, pto_data.num_goal);
 		    b_lateral_max = pto_data.lateral_max * ArrayXXf :: Ones(pto_data.num, pto_data.num_goal);
-			//  road construction
-			// for(int i = 0; i < pto_data.num; ++i) {
-			// 	for(int j = 0; j < pto_data.num_goal; ++j) {
-			// 		if(long_pos(i, j) >= 148 && long_pos(i, j) <= 500) {
-			// 			// b_lateral_max(i, j) =  0;
-			// 			b_lateral_min(i, j) =  0;
-			// 		} else{
-			// 			// b_lateral_max(i, j) = 8;
-			// 			b_lateral_min(i, j) = -8;
-			// 		}
-			// 	}
-			// } 
+		 
 			pto_data.b_lateral_ineq = stack(b_lateral_max, -b_lateral_min, 'v');  
 			// pto_data.s_y_ineq = ((- pto_data.A_lateral_long.matrix() * c_y.transpose().matrix()).array() + pto_data.b_lateral_ineq).max(0.0); //if the value inside the parentheses is less than 0.0, it will be replaced with 0.0. If it is greater than or equal to 0.0, it will remain the same.
-			// over relaxed ADMM
+			// ADMM
 			pto_data.s_y_ineq = (- pto_data.alpha_admm * ((pto_data.A_lateral_long.matrix() * c_y.transpose().matrix()).array() - pto_data.b_lateral_ineq)
 								+ (1-pto_data.alpha_admm)*pto_data.s_y_ineq_old).max(0.0); //if the value inside the parentheses is less than 0.0, it will be replaced with 0.0. If it is greater than or equal to 0.0, it will remain the same.
 		    // cout << "A_lateral_long*c_x value" <<  " " << (- pto_data.A_lateral_long.matrix() * c_x.transpose().matrix()).array() << " " << endl;
@@ -477,7 +385,7 @@ namespace optim {
 			res_ay_vec = (pto_data.A_acc.matrix() * c_y.transpose().matrix()).array() - pto_data.b_ay_ineq + pto_data.s_ay_ineq;
 			res_ax_vec = (pto_data.A_acc.matrix() * c_x.transpose().matrix()).array() - pto_data.b_ax_ineq + pto_data.s_ax_ineq; 
 			// jerk_box_constraints_res  
-		    // over relaxed ADMM
+		    // d ADMM
 			pto_data.s_jy_ineq = (- pto_data.alpha_admm * ((pto_data.A_jerk.matrix() * c_y.transpose().matrix()).array() - pto_data.b_jy_ineq)
 								+ (1-pto_data.alpha_admm)*pto_data.s_jy_ineq_old).max(0.0); //if the value inside the parentheses is less than 0.0, it will be replaced with 0.0. If it is greater than or equal to 0.0, it will remain the same.
 
@@ -539,32 +447,14 @@ namespace optim {
 			pto_data.s_ay_ineq_old = pto_data.s_ay_ineq;
 			pto_data.s_jx_ineq_old = pto_data.s_jx_ineq;
 			pto_data.s_jy_ineq_old = pto_data.s_jy_ineq;
-		    // cout << res_obs(i) <<  " " << res_acc(i) << " " << res_nonhol(i)   << endl;
-			// cout << i << "\t" << "res_obs:" << "\t"  << res_x_obs_vec.matrix().lpNorm<2>()<< "\t"  << res_y_obs_vec.matrix().lpNorm<2>() << "\t" 
-			// 	// << "res_nohol:" << res_nonhol(i) << "\t" 
-		    //     << "res_nohol:"<< "\t"  << res_psi_new.matrix().lpNorm<2>() << "\t"   << res_nonhol(i) << "\t" 
-			// 	<< "res_ax_vec:" << "\t"  << res_ax_vec.matrix().lpNorm<2>() << "\t" 
-			// 	<< "res_ay_vec:" << "\t" << res_ay_vec.matrix().lpNorm<2>() << "\t" 
-			//  	// << "res_jx_vec:" << "\t" << res_jx_vec.matrix().lpNorm<2>() << "\t" << "\t" 
-			// 	// << "res_jy_vec:" << "\t" << res_jy_vec.matrix().lpNorm<2>()  << "\t" 
-			// 	// << "res_x_vec:" << "\t" << res_longitudinal_vec(i) << "\t" 
-			// 	// << "res_y_vec:" << "\t" << res_lateral(i) << "\t" 
-			// 	<< "res_consensus_x:" << "\t" << res_consensus_x.matrix().lpNorm<2>() << "\t" 
-			// 	<< "res_consensus_y:" << "\t" << res_consensus_y.matrix().lpNorm<2>() << "\t" 
-			// 	<< "res_consensus_psi:" << "\t" << res_consensus_psi.matrix().lpNorm<2>() << "\t" 
-			// 	<< endl;		    
+	 	    
 
 			if (res_obs(i) <= 0.1 && res_vel(i) <= 0.05 && res_acc(i) <= 0.1 && res_nonhol(i) <= 0.1 && res_lateral(i) <= 0.1 && res_longitudinal(i) <= 0.1 && res_jy_vec.matrix().lpNorm<2>()  <= 0.1 &&  res_jx_vec.matrix().lpNorm<2>()  <= 0.1) {
 				cout  << i  << "\t" << "converge break:" << "\t" << res_obs(i) <<  " " << res_vel(i) <<  " " << res_acc(i) << " " << res_nonhol(i) << endl;
 		        cout  << i  << "\t" << "converge break:" << "\t"<< res_jx_vec.matrix().lpNorm<2>() <<  " "<< res_jy_vec.matrix().lpNorm<2>() <<  " "<< res_lateral(i) <<  " " << res_longitudinal(i) << endl;
 				break;
 			}
-		 
-			// pto_data.rho_consensus_psi = pto_data.rho_consensus_psi * coefficient_rho;        
-			// pto_data.rho_consensus_x = pto_data.rho_consensus_x  * coefficient_rho;
-			// pto_data.rho_consensus_y = pto_data.rho_consensus_y * coefficient_rho; 
-			// pto_data.rho_psi = pto_data.rho_psi * coefficient_rho;
-			// pto_data.rho_obs = pto_data.rho_obs * coefficient_rho;
+		  
 			pto_data.rho_lateral_long = pto_data.rho_lateral_long * coefficient_rho;
 			pto_data.rho_vel = pto_data.rho_vel * coefficient_rho;
 			pto_data.rho_acc = pto_data.rho_acc * coefficient_rho;
@@ -780,13 +670,8 @@ namespace optim {
 		pto_data.psidot_init = psidot_init * ones(pto_data.num_goal, 1);
 		pto_data.psidot_fin = 0.0 * ones(pto_data.num_goal, 1);
 		pto_data.v_init = v_init * ones(pto_data.num_goal, 1);
-		// ArrayXXf numbers(pto_data.num_obs, pto_data.num);
-		// for(int i = 0; i < pto_data.num_obs; ++i)
-		// numbers.row(i).setLinSpaced(pto_data.num, 0, pto_data.num);
-		// pto_data.x_obs = (ones(pto_data.num_obs, pto_data.num)).colwise() * (x_obs_temp).col(0) + (numbers.colwise() * vx_obs.col(0) * pto_data.t);
-		// pto_data.y_obs = (ones(pto_data.num_obs, pto_data.num)).colwise() * (y_obs_temp).col(0) + (numbers.colwise() * vy_obs.col(0) * pto_data.t);
  
-		// TODO: this warm starts the nominal trajectory
+		 
 		pto_data.x_guess = ArrayXXf(pto_data.num_goal, pto_data.num);
 		pto_data.y_guess = ArrayXXf(pto_data.num_goal, pto_data.num); 
 		if (pto_data.x.rows() > 0) {
@@ -819,13 +704,7 @@ namespace optim {
 		ArrayXXf wc_alpha(pto_data.num_goal, pto_data.num_obs*pto_data.num);
 		ArrayXXf ws_alpha(pto_data.num_goal, pto_data.num_obs*pto_data.num);
 		ArrayXXf randm, randm2(1, pto_data.num_obs * pto_data.num), randm3(1, pto_data.num_obs*pto_data.num);
-      	// int half_num = pto_data.num / 2;
-		// ArrayXf first_half = ArrayXf::Constant(half_num, static_cast<float>(pto_data.gamma));
-		// ArrayXf second_half = ArrayXf::LinSpaced(half_num, static_cast<float>(pto_data.gamma), 0.initializeArrays2f).pow(2) * (1.0f - pto_data.gamma) + pto_data.gamma;
-	    // static 
-	   	// pto_data.gamma_matrices = ArrayXf::LinSpaced(pto_data.num, static_cast<float>(pto_data.gamma), static_cast<float>(pto_data.gamma)).replicate(pto_data.num_obs, pto_data.num_goal).transpose();
-	   	// // worked in both static&dynamic, policy less conservative
-		pto_data.gamma_matrices = ArrayXf::LinSpaced(pto_data.num, static_cast<float>(pto_data.gamma), 1.0f).replicate(pto_data.num_obs, pto_data.num_goal).transpose();
+        pto_data.gamma_matrices = ArrayXf::LinSpaced(pto_data.num, static_cast<float>(pto_data.gamma), 1.0f).replicate(pto_data.num_obs, pto_data.num_goal).transpose();
 		// cout << "pto_data.gamma_matrices." <<  pto_data.gamma_matrices << endl;
 		// cout<< "gamma_matrices rows(): " << pto_data.gamma_matrices.rows() << " cols()" << pto_data.gamma_matrices.cols() << endl;
 		for(int i = 0; i < pto_data.num_goal; ++i) {	
