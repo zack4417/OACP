@@ -43,14 +43,8 @@ If you use this code in your research, please cite:
   - [ROS Noetic](http://wiki.ros.org/noetic/Installation)
   - [Eigen QuadProg](https://github.com/jrl-umi3218/eigen-quadprog)
   - Python 3.8+
-  
-- **Datasets:**
-  - [NGSIM I-80 Dataset](https://drive.google.com/drive/folders/1cgsOWnc4JTeyNdBN6Fjef2-J5HqjnWyX?usp=sharing)
-  ```bash
-  # Place downloaded files in:
-  ros_ws/src/oacp/python_env/highway/
-  ```
-
+  - [ROS Noetic](https://wiki.ros.org/noetic/Installation/Ubuntu)
+   
 ## Installation
 ```bash
 # Create workspace
@@ -64,8 +58,7 @@ git clone https://github.com/yourusername/oacp.git
 cd ~/ros_ws
 catkin_make
 source devel/setup.bash
-```
-
+``` 
 ## Configuration
 Modify `config.yaml` to set your scenario:
 ```yaml
@@ -74,8 +67,8 @@ setting: "OCC_IDM"  # Available options:
                     #   "Racing_IDM" - High-speed racing scenario
                     #   "NGSIM" - Real-world trajectory replay
 obstacles: "dynamic" # "static" or "dynamic"
-num_obs: 5          # Number of obstacles
-delta_time: 0.05    # Simulation timestep
+num_obs: 4         # Number of obstacles
+delta_time: 0.1    # Simulation timestep
 ```
 
 ## Usage
