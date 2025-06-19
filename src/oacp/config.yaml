@@ -15,7 +15,7 @@ configuration:
     y_g: [0, 0, -3.6,  -9, -5, -4.5, 6, -6, 3] 
     y_delta: [0, 0,  0.01, -0.01, 0.01]
     pos_limits: [-500, 50, -0.01, 0.01]
-    file: "/home/zack/Documents/ros_ws/AV_ws/stats/New/Cruise/No-Time-Budget/OCC_zzack_consensus5_time.txt"
-    file_mpc: "/home/zack/Documents/ros_ws/AV_ws/stats/New/Cruise/No-Time-Budget/OCC_zzack_consensus5_Receding_w_risk.txt"
-    file_safety: "/home/zack/Documents/ros_ws/AV_ws/stats/New/Cruise/No-Time-Budget/OCC_zzack_consensus5_safety_w_risk.txt"
+    file: "stats/OCC_consensus5_time.txt"
+    file_mpc: "stats/OCC_consensus5_Receding_w_risk.txt"
+    file_safety: "stats/OCC_consensus5_safety_w_risk.txt"
     weights: [200, 20, 20,  40]

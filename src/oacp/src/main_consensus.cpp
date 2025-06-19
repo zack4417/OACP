@@ -396,7 +396,7 @@ void MinimalPublisher::SafetyAdjustment() {
 
 void MinimalPublisher::VelocityBoundary(
     const oacp::States::ConstPtr& msg) {
-  ROS_INFO("Received a vel boundary msg");
+  // ROS_INFO("Received a vel boundary msg");
   pto_data_.vxc_max = msg->vxc_max;
   pto_data_.vxc1_max = msg->vxc1_max;
   pto_data_.vxc_min = msg->vxc_min;
