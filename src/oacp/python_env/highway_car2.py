@@ -204,7 +204,7 @@ class MinimalSubscriber:
             data = f.read()
             data = yaml.load(data, Loader=yaml.FullLoader) # 
             setting = str(data["setting"])
-        # cruise = 0, Right Lane = 1, High Speed RightLane = 2, NGSIM = 3
+ 
         with open(osp.join(cur_d, './config.yaml')) as f_obstacles:
             data_obstacles = f_obstacles.read()
             data_obstacles = yaml.load(data_obstacles, Loader=yaml.FullLoader) #
@@ -220,18 +220,10 @@ class MinimalSubscriber:
             self.setting = 0 
 
         elif setting == "OCC_IDM":
-            self.setting = 1
-        elif setting == "Racing_IDM":
-            self.setting = 2
-        elif setting == "curve_IDM":
-            self.setting = 4
+            self.setting = 1 
         else:
             self.setting = 3
-
-        if self.setting == 3:
-            self.NGSIM = True
-        else:
-            self.NGSIM = False
+ 
         print (self.setting)
      
         self.obs = np.zeros([self.num_obs+1, 6])  
@@ -243,133 +235,80 @@ class MinimalSubscriber:
         self.obs_std_devs = [0, 0, 0, 0, 0, 0]
         self.sv_control_std_devs = [0]
         # [0.05, 0.02, 0.02, 0.005]        
-        if self.NGSIM == False: 
-            if self.setting == 1:    #occ
-                self.obs[0,:4]= [-50,  0, 5.0, 0.0]          
-                total_obs = 10
-                mid_lane_x = [3.75, 0]
-                self.other_vehicles = np.zeros([total_obs, 6])       # x y vx vy dist psi
- 
-                # Assign lane positions to vehicles (alternating between lanes)
-                lanes = np.tile(mid_lane_x, int(np.ceil(total_obs / len(mid_lane_x))))
-                self.other_vehicles[:, 0] = lanes[:total_obs]  # Assign x positions (lanes)
-                    
-                self.other_vehicles[:,1] = np.array([-10, 30, -20, 20, -30, 10, 
-                                                     -40, 40, -50, 50 ]) 
-                self.other_vehicles[:,5] = np.zeros(total_obs) 
-                # Desired speeds for each vehicle in vy (primary movement)
-                # self.other_vehicles_desired = [9, -8.5, 4, -7, 5.0, -5.5, 4.5, -6.5, 7.5, -8.0]  # m/s 
-                self.other_vehicles_desired = [9, -9.5, 4, -7, 5.0, -5.5, 6.5, -7.5, 8.5, -9.0]  # m/s 
-                # self.other_vehicles[:,3] = [5, -6, 4, -4, 4.0, -2.5, 4.0, -3.0]
-                self.other_vehicles[:,3] = np.roll(self.other_vehicles_desired, 2)
- 
-                # Calculate initial distances to the ego vehicle (index 0 of obs)
-                ego_x, ego_y = self.obs[0][0], self.obs[0][1]
-                delta_x = self.other_vehicles[:, 0] - ego_x
-                delta_y = self.other_vehicles[:, 1] - ego_y 
-                self.other_vehicles[:, 4] = np.sqrt(delta_x**2 + delta_y**2)  
-                self.other_vehicles[:,4] = np.where(
-                            ( (self.other_vehicles[:,1] > 5.5) & (self.other_vehicles[:,0] > 2) & (self.other_vehicles[:,0] < 5) ) |
-                            ( (self.other_vehicles[:,1] < -5.5) & (self.other_vehicles[:,0] > -2) & (self.other_vehicles[:,0] < 2) ),
-                            np.inf,
-                            self.other_vehicles[:,4]
-                        )
-                self.other_vehicles = self.other_vehicles[self.other_vehicles[:, 4].argsort()]
-                              
-                for i in range(self.num_obs):
-                    self.obs[i+1] = self.other_vehicles[i,:6];  # [x, y, vx, vy, dist, psi] 
-             
-            else: 
-                self.obs[0,:4]= [-50, 0, 15.0, 0.0]   #   cruise 
-                total_obs = 18
-                mid_lane_y = [-11.25, -7.5, -3.75, 0, 3.75, 7.5]
-                self.other_vehicles = np.zeros([total_obs, 6])       # x y vx vy dist psi
-                self.other_vehicles[:,1] = (np.hstack((mid_lane_y, mid_lane_y, mid_lane_y)))
-                self.other_vehicles[:,5] = np.zeros(total_obs)
-                #cruise and hsrl
-                if self.setting == 0:
-                    self.other_vehicles[:,0] = np.array([-10, 25, 60, 40, -20, 55,
-                                                        70, 105, 120, 10, 80, 190,
-                                                        130, 140, 180, 160,  205, 95 
-                    ])
-                elif self.setting == 2:
-                    self.other_vehicles[:,0] = np.array([-10, 25, 60, 40, -20, 155,
-                                                        70, 105, 120, 10, 80, 290,
-                                                        130, 140, 180, 160,  105, 195 
-                    ])
-                else:
-                    self.other_vehicles[:,0] = np.array([-10, 25,   60, -20, 5, -35,
-                                                        90, 85,   75, 10, 25, 50,
-                                                        20, 40,   10,  100, 50, 95 
-                    ])
-                self.other_vehicles[:,4] = np.sqrt((self.other_vehicles[:,0] - self.obs[0][0])**2 + (self.other_vehicles[:,1] - self.obs[0][1])**2) + (((-self.other_vehicles[:,0] + self.obs[0][0] - self.a_ell/2)/(abs(-self.other_vehicles[:,0] + self.obs[0][0] - self.a_ell/2)+0.0001)) + 1) * 10000
-                self.other_vehicles[:,4] = np.where(abs(self.other_vehicles[:,1] - self.obs[0][1])  < self.perception_lat, self.other_vehicles[:,4], np.inf)
-                self.other_vehicles = self.other_vehicles[self.other_vehicles[:, 4].argsort()]
+        if self.setting == 1:    #occ
+            self.obs[0,:4]= [-50,  0, 5.0, 0.0]          
+            total_obs = 10
+            mid_lane_x = [3.75, 0]
+            self.other_vehicles = np.zeros([total_obs, 6])       # x y vx vy dist psi
 
-                if self.setting == 2: 
-                    self.other_vehicles_desired = [10, 11, 8.0, 9.5, 22, 28.5, 
-                                7.5, 8.5, 7.0, 9.0, 21.5, 29.0,
-                                10.0, 9.5, 7.2, 9.5, 20, 27.5]
-                else:
-                    self.other_vehicles_desired = [10, 11, 8.0, 9.5, 18.5, 22, 
-                                7.5, 8.5, 7.0, 9.0, 18.5, 19.0,
-                                10.0, 9.5, 7.2, 9.5, 15, 20.5]
-                self.other_vehicles[:,2] = np.roll(self.other_vehicles_desired, 0)
-                for i in range(self.num_obs):
-                    self.obs[i+1] = self.other_vehicles[i,:] 
-            
-        else:
-            if setting == "cruise_NGSIM":
-#    
-                file = "ngsim_data0.csv"
-                self.time_shift = 250.0
-                self.y_shift = 10.7
-                self.obs[0,:4]=[70, 6, 15.0, 0.0] #cruise  
-                # file = "ngsim_data1.csv"
-                # self.time_shift = 511.12
-                # self.y_shift = 11.7
-                # self.obs[0,:4]=[0, -2, 15.0, 0.0] #cruise
+            # Assign lane positions to vehicles (alternating between lanes)
+            lanes = np.tile(mid_lane_x, int(np.ceil(total_obs / len(mid_lane_x))))
+            self.other_vehicles[:, 0] = lanes[:total_obs]  # Assign x positions (lanes)
                 
-                # file = "ngsim_data0.csv"
-                # self.time_shift = 250.0
-                # self.y_shift = 10.7
-                # self.obs[0,:4]=[25, 2, 15.0, 0.0] #cruise cruise cut in
- 
-            elif setting == "Car_Following_NGSIM":
-                # file = "ngsim_data0.csv"
-                # self.time_shift = 250.0
-                # self.y_shift = 10.7s
- 
-                file = "ngsim_data1.csv"
-                self.time_shift = 511.12
-                self.y_shift = 11.7
-                self.obs[0,:4]= [0, 80, 10.0, 0.0] #following
-            else:
-                file = "ngsim_data1.csv"
-                self.time_shift = 511.12
-                self.y_shift = 11.7
-                self.obs[0,:4]=[-5, -2, 15.0, 0.0] 
+            self.other_vehicles[:,1] = np.array([-10, 30, -20, 20, -30, 10, 
+                                                    -40, 40, -50, 50 ]) 
+            self.other_vehicles[:,5] = np.zeros(total_obs) 
+            # Desired speeds for each vehicle in vy (primary movement)
+            # self.other_vehicles_desired = [9, -8.5, 4, -7, 5.0, -5.5, 4.5, -6.5, 7.5, -8.0]  # m/s 
+            self.other_vehicles_desired = [9, -9.5, 4, -7, 5.0, -5.5, 6.5, -7.5, 8.5, -9.0]  # m/s 
+            # self.other_vehicles[:,3] = [5, -6, 4, -4, 4.0, -2.5, 4.0, -3.0]
+            self.other_vehicles[:,3] = np.roll(self.other_vehicles_desired, 2)
 
-            print("READING DATA........")
-            self.ngsim_obs = np.genfromtxt('src/oacp/'+file,delimiter=',') # id x y psi length width vx vy  time
-            mask = self.ngsim_obs[:,8] == np.round(self.time_shift, 2) # 2 for data0
-            ngsim_obs = self.ngsim_obs[mask,:]
+            # Calculate initial distances to the ego vehicle (index 0 of obs)
+            ego_x, ego_y = self.obs[0][0], self.obs[0][1]
+            delta_x = self.other_vehicles[:, 0] - ego_x
+            delta_y = self.other_vehicles[:, 1] - ego_y 
+            self.other_vehicles[:, 4] = np.sqrt(delta_x**2 + delta_y**2)  
+            self.other_vehicles[:,4] = np.where(
+                        ( (self.other_vehicles[:,1] > 5.5) & (self.other_vehicles[:,0] > 2) & (self.other_vehicles[:,0] < 5) ) |
+                        ( (self.other_vehicles[:,1] < -5.5) & (self.other_vehicles[:,0] > -2) & (self.other_vehicles[:,0] < 2) ),
+                        np.inf,
+                        self.other_vehicles[:,4]
+                    )
+            self.other_vehicles = self.other_vehicles[self.other_vehicles[:, 4].argsort()]
+                            
+            for i in range(self.num_obs):
+                self.obs[i+1] = self.other_vehicles[i,:6];  # [x, y, vx, vy, dist, psi] 
             
-            self.other_vehicles = np.zeros([len(ngsim_obs), 8]) # x y vx vy dist psi length width
-            self.other_vehicles[:,0] = ngsim_obs[:,2]
-            self.other_vehicles[:,1] = ngsim_obs[:,1] - self.y_shift
-            self.other_vehicles[:,2] = ngsim_obs[:,7]
-            self.other_vehicles[:,3] = ngsim_obs[:,6]
-            self.other_vehicles[:,5] = (np.pi/2 - ngsim_obs[:,3])
-            self.other_vehicles[:,6] = ngsim_obs[:,4]
-            self.other_vehicles[:,7] = ngsim_obs[:,5]
-            # self.other_vehicles[:,4] = np.sqrt((self.other_vehicles[:,0] - self.obs[0][0])**2 + (self.other_vehicles[:,1] - self.obs[0][1])**2)
+        else: 
+            self.obs[0,:4]= [-50, 0, 15.0, 0.0]   #   cruise 
+            total_obs = 18
+            mid_lane_y = [-11.25, -7.5, -3.75, 0, 3.75, 7.5]
+            self.other_vehicles = np.zeros([total_obs, 6])       # x y vx vy dist psi
+            self.other_vehicles[:,1] = (np.hstack((mid_lane_y, mid_lane_y, mid_lane_y)))
+            self.other_vehicles[:,5] = np.zeros(total_obs)
+            #cruise and hsrl
+            if self.setting == 0:
+                self.other_vehicles[:,0] = np.array([-10, 25, 60, 40, -20, 55,
+                                                    70, 105, 120, 10, 80, 190,
+                                                    130, 140, 180, 160,  205, 95 
+                ])
+            elif self.setting == 2:
+                self.other_vehicles[:,0] = np.array([-10, 25, 60, 40, -20, 155,
+                                                    70, 105, 120, 10, 80, 290,
+                                                    130, 140, 180, 160,  105, 195 
+                ])
+            else:
+                self.other_vehicles[:,0] = np.array([-10, 25,   60, -20, 5, -35,
+                                                    90, 85,   75, 10, 25, 50,
+                                                    20, 40,   10,  100, 50, 95 
+                ])
             self.other_vehicles[:,4] = np.sqrt((self.other_vehicles[:,0] - self.obs[0][0])**2 + (self.other_vehicles[:,1] - self.obs[0][1])**2) + (((-self.other_vehicles[:,0] + self.obs[0][0] - self.a_ell/2)/(abs(-self.other_vehicles[:,0] + self.obs[0][0] - self.a_ell/2)+0.0001)) + 1) * 10000
             self.other_vehicles[:,4] = np.where(abs(self.other_vehicles[:,1] - self.obs[0][1])  < self.perception_lat, self.other_vehicles[:,4], np.inf)
             self.other_vehicles = self.other_vehicles[self.other_vehicles[:, 4].argsort()]
-            # self.obs[1:] = self.other_vehicles[:len(self.obs)-1,:6]
+
+            if self.setting == 2: 
+                self.other_vehicles_desired = [10, 11, 8.0, 9.5, 22, 28.5, 
+                            7.5, 8.5, 7.0, 9.0, 21.5, 29.0,
+                            10.0, 9.5, 7.2, 9.5, 20, 27.5]
+            else:
+                self.other_vehicles_desired = [10, 11, 8.0, 9.5, 18.5, 22, 
+                            7.5, 8.5, 7.0, 9.0, 18.5, 19.0,
+                            10.0, 9.5, 7.2, 9.5, 15, 20.5]
+            self.other_vehicles[:,2] = np.roll(self.other_vehicles_desired, 0)
             for i in range(self.num_obs):
-                self.obs[i+1] = self.other_vehicles[i,:6] 
+                self.obs[i+1] = self.other_vehicles[i,:] 
+      
         self.ours_x = []
         self.ours_y = [] 
         self.former_traj_x = []
@@ -1114,7 +1053,6 @@ class MinimalSubscriber:
     def timer_callback(self, event):
         # rospy.loginfo("Timer callback triggered")
         # rospy.loginfo(f"Current obs value: {self.obs}")
-        # if (self.obs[0][0] < 28000 and self.setting == 2) or (self.obs[0][0] < 28000 and self.setting == 1) or (self.obs[0][0] < 28000 and self.setting == 4) or (self.obs[0][0] < 25010 and self.setting == 0) or (self.obs[0][0] < 25000 and self.NGSIM == True):#self.obs[0][1] >= -8.0-0.7:#self.obs[0][0] < 5010:#self.obs[0][1] >= -8.0-0.7:#self.obs[0][0] < 5010 or self.obs[0][1] >= -10:
  
         if self.Gotit or self.flag:
                 t1 = time()
@@ -1135,64 +1073,38 @@ class MinimalSubscriber:
                     self.obs[0][1] += self.obs[0][3] * dt    #y
                     self.former_obs.append([self.obs[0][0], self.obs[0][1], self.obs[0][2], self.obs[0][3]])
 
-                    if self.NGSIM == False: 
-                        # self.IDM()
-                        self.IDM_OCC()
-                        if self.obstacles_setting == 0:
-                            self.other_vehicles[:,2] = 0    #vx
-                            self.other_vehicles[:,3] = 0    #vy
-                        self.other_vehicles[:,0] += self.other_vehicles[:,2] * dt    #x
-                        self.other_vehicles[:,1] += self.other_vehicles[:,3] * dt    #y
-               
-                        self.other_vehicles[:,4] = np.sqrt((self.other_vehicles[:,0] - self.obs[0][0])**2 + (self.other_vehicles[:,1] - self.obs[0][1])**2) + (((-self.other_vehicles[:,0] + self.obs[0][0] - self.perception_lon)/(abs(-self.other_vehicles[:,0] + self.obs[0][0]-self.perception_lon)+0.0001)) + 1) * 10000
-                        self.other_vehicles[:,4] = np.where(abs(self.other_vehicles[:,1] - self.obs[0][1]) < self.perception_lat, self.other_vehicles[:,4], np.inf)
-                        self.other_vehicles[:,4] = np.where(
-                            ( (self.other_vehicles[:,1] > 5.5) & (self.other_vehicles[:,0] > 2) & (self.other_vehicles[:,0] < 5) ) |
-                            ( (self.other_vehicles[:,1] < -5.5) & (self.other_vehicles[:,0] > -2) & (self.other_vehicles[:,0] < 2) ),
-                            np.inf,
-                            self.other_vehicles[:,4]
-                        )
-                        self.other_vehicles = self.other_vehicles[self.other_vehicles[:, 4].argsort()]
-                        # Determine the number of vehicles to add noise to
-                        num_vehicles = min(len(self.obs) - 1, len(self.other_vehicles))
-                        distance = np.sqrt((self.other_vehicles[:num_vehicles,0] - self.obs[0][0])**2 + (self.other_vehicles[:num_vehicles,1] - self.obs[0][1])**2)  
-                        # Add Gaussian noise to each dimension of the observations, and dynamic adjust noise level
-                        noise_matrix = np.random.normal(0, self.obs_std_devs, (num_vehicles, 6)) 
-                        noise_matrix = self.adjust_std_devs(distance, noise_matrix)   
-                        # print("Added noise:\n", noise_matrix)
-                        self.obs[1:] = self.other_vehicles[:len(self.obs)-1,:] + noise_matrix  
-                        # self.other_vehicles[:,0] += self.other_vehicles[:,2] * dt    #x
-                        # self.other_vehicles[:,1] += self.other_vehicles[:,3] * dt    #y
-                        # self.other_vehicles[:,4] = np.sqrt((self.other_vehicles[:,0] - self.obs[<80][0])**2 + (self.other_vehicles[:,1] - self.obs[0][1])**2) + (((-self.other_vehicles[:,0] + self.obs[0][0]-self.a_ell/2)/(abs(-self.other_vehicles[:,0] + self.obs[0][0]-self.a_ell/2)+0.0001)) + 1) * 10000
-                        # self.other_vehicles = self.other_vehicles[self.other_vehicles[:, 4].argsort()]
-                        # self.obs[1:] = self.other_vehicles[:len(self.obs)-1,:]
-                    else:
-                        mask = self.ngsim_obs[:,8] == np.round(self.sim_time[-1] + self.time_shift, 2)
-                        ngsim_obs = self.ngsim_obs[mask,:]
-                        
-                        self.other_vehicles = np.zeros([len(ngsim_obs), 8]) # x y vx vy dist psi length width
-                        self.other_vehicles[:,0] = ngsim_obs[:,2]
-                        self.other_vehicles[:,1] = ngsim_obs[:,1] - self.y_shift
-                        
-                        self.other_vehicles[:,2] = ngsim_obs[:,7]
-                        self.other_vehicles[:,3] = ngsim_obs[:,6]
-                        self.other_vehicles[:,5] = (np.pi/2 - ngsim_obs[:,3])
-                        self.other_vehicles[:,6] = ngsim_obs[:,4]
-                        self.other_vehicles[:,7] = ngsim_obs[:,5]
-                        
-                        # self.other_vehicles[:,4] = np.sqrt((self.other_vehicles[:,0] - self.obs[0][0])**2 + (self.other_vehicles[:,1] - self.obs[0][1])**2) 
-                        self.other_vehicles[:,4] = np.sqrt((self.other_vehicles[:,0] - self.obs[0][0])**2 + (self.other_vehicles[:,1] - self.obs[0][1])**2) + (((-self.other_vehicles[:,0] + self.obs[0][0]- self.a_ell)/(abs(-self.other_vehicles[:,0] + self.obs[0][0]- self.a_ell)+0.0001)) + 1) * 10000
-                        self.other_vehicles[:,4] = np.where(abs(self.other_vehicles[:,1] - self.obs[0][1])  < self.perception_lat, self.other_vehicles[:,4], np.inf)
-
-                        self.other_vehicles = self.other_vehicles[self.other_vehicles[:, 4].argsort()]
-                        # Determine the number of vehicles to add noise to
-                        num_vehicles = min(len(self.obs) - 1, len(self.other_vehicles))
-                        distance = np.sqrt((self.other_vehicles[:num_vehicles,0] - self.obs[0][0])**2 + (self.other_vehicles[:num_vehicles,1] - self.obs[0][1])**2)  
-                        # Add Gaussian noise to each dimension of the observations
-                        noise_matrix = np.random.normal(0, self.obs_std_devs, (num_vehicles, 6)) 
-                        noise_matrix = self.adjust_std_devs(distance, noise_matrix)   
-                        self.obs[1:] = self.other_vehicles[:len(self.obs)-1,:6] + noise_matrix
-                     
+            
+                    # self.IDM()
+                    self.IDM_OCC()
+                    if self.obstacles_setting == 0:
+                        self.other_vehicles[:,2] = 0    #vx
+                        self.other_vehicles[:,3] = 0    #vy
+                    self.other_vehicles[:,0] += self.other_vehicles[:,2] * dt    #x
+                    self.other_vehicles[:,1] += self.other_vehicles[:,3] * dt    #y
+            
+                    self.other_vehicles[:,4] = np.sqrt((self.other_vehicles[:,0] - self.obs[0][0])**2 + (self.other_vehicles[:,1] - self.obs[0][1])**2) + (((-self.other_vehicles[:,0] + self.obs[0][0] - self.perception_lon)/(abs(-self.other_vehicles[:,0] + self.obs[0][0]-self.perception_lon)+0.0001)) + 1) * 10000
+                    self.other_vehicles[:,4] = np.where(abs(self.other_vehicles[:,1] - self.obs[0][1]) < self.perception_lat, self.other_vehicles[:,4], np.inf)
+                    self.other_vehicles[:,4] = np.where(
+                        ( (self.other_vehicles[:,1] > 5.5) & (self.other_vehicles[:,0] > 2) & (self.other_vehicles[:,0] < 5) ) |
+                        ( (self.other_vehicles[:,1] < -5.5) & (self.other_vehicles[:,0] > -2) & (self.other_vehicles[:,0] < 2) ),
+                        np.inf,
+                        self.other_vehicles[:,4]
+                    )
+                    self.other_vehicles = self.other_vehicles[self.other_vehicles[:, 4].argsort()]
+                    # Determine the number of vehicles to add noise to
+                    num_vehicles = min(len(self.obs) - 1, len(self.other_vehicles))
+                    distance = np.sqrt((self.other_vehicles[:num_vehicles,0] - self.obs[0][0])**2 + (self.other_vehicles[:num_vehicles,1] - self.obs[0][1])**2)  
+                    # Add Gaussian noise to each dimension of the observations, and dynamic adjust noise level
+                    noise_matrix = np.random.normal(0, self.obs_std_devs, (num_vehicles, 6)) 
+                    noise_matrix = self.adjust_std_devs(distance, noise_matrix)   
+                    # print("Added noise:\n", noise_matrix)
+                    self.obs[1:] = self.other_vehicles[:len(self.obs)-1,:] + noise_matrix  
+                    # self.other_vehicles[:,0] += self.other_vehicles[:,2] * dt    #x
+                    # self.other_vehicles[:,1] += self.other_vehicles[:,3] * dt    #y
+                    # self.other_vehicles[:,4] = np.sqrt((self.other_vehicles[:,0] - self.obs[<80][0])**2 + (self.other_vehicles[:,1] - self.obs[0][1])**2) + (((-self.other_vehicles[:,0] + self.obs[0][0]-self.a_ell/2)/(abs(-self.other_vehicles[:,0] + self.obs[0][0]-self.a_ell/2)+0.0001)) + 1) * 10000
+                    # self.other_vehicles = self.other_vehicles[self.other_vehicles[:, 4].argsort()]
+                    # self.obs[1:] = self.other_vehicles[:len(self.obs)-1,:]
+                    
                 self.checkCollision()
                 msg = States()
                 msg.x = self.obs[:,0].T.tolist()
@@ -1293,29 +1205,29 @@ class MinimalSubscriber:
                 self.Gotit = 0
                 self.flag = 0 # flag=1 -> no visualization
                 # print("delta: time:", time() - t1)
-                if self.NGSIM == False: 
-                    if self.setting == 0:  #IDM
-                        for i in range(len(self.other_vehicles)):
-                            if self.other_vehicles[i][0] < self.lower_lim-6:                    
-                                self.other_vehicles[i][0] = self.upper_lim + 5 + self.other_vehicles[i][2]
-                                self.other_vehicles[i][2] -= 2 * (i%2)
-                                if (self.other_vehicles[i][1] == -10 and self.other_vehicles[i][1] == -6) or self.setting == 1 or self.setting == 0: # for hsrl
-                                    self.other_vehicles[i][0] += 15 * (i%3)
-                    else: #Intersection
-                        for i in range(len(self.other_vehicles)):
-                            original_y = self.other_vehicles[i][1]  # Store the original value
-                            # First condition
-                            if original_y < self.lower_lim - 6:                    
-                                self.other_vehicles[i][1] = self.upper_lim + 4
-                                self.other_vehicles[i][3] -= 2 * (i % 2) 
-                            
-                            # Second condition checks the original value
-                            if original_y > self.upper_lim + 5:                    
-                                self.other_vehicles[i][1] = self.lower_lim - 5 
-                                self.other_vehicles[i][3] -= 2 * (i % 2)
-                            else: 
-                                pass
-                
+     
+                if self.setting == 0:  #IDM
+                    for i in range(len(self.other_vehicles)):
+                        if self.other_vehicles[i][0] < self.lower_lim-6:                    
+                            self.other_vehicles[i][0] = self.upper_lim + 5 + self.other_vehicles[i][2]
+                            self.other_vehicles[i][2] -= 2 * (i%2)
+                            if (self.other_vehicles[i][1] == -10 and self.other_vehicles[i][1] == -6) or self.setting == 1 or self.setting == 0: # for hsrl
+                                self.other_vehicles[i][0] += 15 * (i%3)
+                else: #Intersection
+                    for i in range(len(self.other_vehicles)):
+                        original_y = self.other_vehicles[i][1]  # Store the original value
+                        # First condition
+                        if original_y < self.lower_lim - 6:                    
+                            self.other_vehicles[i][1] = self.upper_lim + 4
+                            self.other_vehicles[i][3] -= 2 * (i % 2) 
+                        
+                        # Second condition checks the original value
+                        if original_y > self.upper_lim + 5:                    
+                            self.other_vehicles[i][1] = self.lower_lim - 5 
+                            self.other_vehicles[i][3] -= 2 * (i % 2)
+                        else: 
+                            pass
+            
           
 def main():
     rospy.init_node('env_sub', anonymous=True)
