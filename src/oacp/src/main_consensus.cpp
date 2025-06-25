@@ -80,7 +80,7 @@ MinimalPublisher::MinimalPublisher() : count_(0) {
 
   Gotit_ = false;
   warm_ = true;
-  YAML::Node map = YAML::LoadFile("src/oacp/config.yaml");
+  YAML::Node map = YAML::LoadFile("/home/zmz/OACP/src/oacp/config.yaml");
 
   std::string setting = map["setting"].as<std::string>();
   pto_data_.alpha_admm = 1.0;

@@ -1,0 +1,21 @@
+setting: OCC_IDM # Racing_NGSIM cruise_IDM OCC_IDM
+configuration: 
+  OCC_IDM:  #larger barrier
+    goal: 2 
+    rho: 5
+    coefficient_rho: 1.0 
+    coefficient_rho_d: 1
+    gamma: 0.2
+    consensus: 5
+    safe_lon: 6.0
+    safe_lat: 6.0
+    v_max: 10
+    v_g: [7, 7] 
+    x_g: [60, 65.0, 30.0, 75, 75, 75, 75, 75, 75, 75]
+    y_g: [0, 0, -3.6,  -9, -5, -4.5, 6, -6, 3] 
+    y_delta: [0, 0,  0.01, -0.01, 0.01]
+    pos_limits: [-500, 50, -0.01, 0.01]
+    file: "stats/OCC_consensus5_time.txt"
+    file_mpc: "stats/OCC_consensus5_Receding_w_risk.txt"
+    file_safety: "stats/OCC_consensus5_safety_w_risk.txt"
+    weights: [200, 20, 20,  40]

@@ -14,7 +14,7 @@
 
 using namespace std;
 using namespace Eigen;
-YAML::Node map_t = YAML::LoadFile("src/oacp/config.yaml");
+YAML::Node map_t = YAML::LoadFile("/home/zmz/OACP/src/oacp/config.yaml");
 string setting = map_t["setting"].as<string>();
 float rho =  map_t["configuration"][setting]["rho"].as<float>();
 float coefficient_rho = map_t["configuration"][setting]["coefficient_rho"].as<float>();

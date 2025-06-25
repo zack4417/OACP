@@ -21,6 +21,8 @@ from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point, Quaternion, Twist, Vector3, TransformStamped
 from oacp.msg import States, Controls  
 from tf.transformations import quaternion_from_euler
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Pose, PoseStamped, TwistStamped, Twist
 
 
 COLOR_RGB_MAP = {
@@ -117,6 +119,7 @@ color_map = {
 class MinimalSubscriber:
     def __init__(self):    
         random.seed(0)
+        self.first_refresh=False
         self.a_ell = 5.6
         self.b_ell = 2.9
         self.a_rect_ev = 3.6
@@ -166,6 +169,7 @@ class MinimalSubscriber:
         self.sample_dis = 2.0
         self.dash_length = 3  # Length of the dashes
         self.gap_length = 6.0   # Length of the gaps
+        self.steps=[]
         # Add highway lines IDM
         self.lines = [
             # (-5.625, -5.625),
@@ -245,7 +249,7 @@ class MinimalSubscriber:
         # [0.05, 0.02, 0.02, 0.005]        
         if self.NGSIM == False: 
             if self.setting == 1:    #occ
-                self.obs[0,:4]= [-50,  0, 5.0, 0.0]          
+                self.obs[0,:4]= [-55,  0, 5.0, 0.0]          
                 total_obs = 10
                 mid_lane_x = [3.75, 0]
                 self.other_vehicles = np.zeros([total_obs, 6])       # x y vx vy dist psi
@@ -412,12 +416,15 @@ class MinimalSubscriber:
 
         # Subscriptions
         self.subscription = rospy.Subscriber('ego_vehicle_cmds', Controls, self.listener_callback)
+        self.subscription2 = rospy.Subscriber('/lgp_car/vel_cmd', Twist, self.listener_callback2)
    
         # Publishers
         self.publisher_markers = rospy.Publisher('visualization_marker_array', MarkerArray, queue_size=10)
         self.publisher_ev_markers = rospy.Publisher('visualization_marker_ev_array', MarkerArray, queue_size=10)
+        self.publisher_pv_markers = rospy.Publisher('/lgp_obstacle_belief/marker_array_inneed', MarkerArray, queue_size=10)
         # self.publisher_ = rospy.Publisher('ego_vehicle_obs', States, queue_size=10)
         self.publisher_ = rospy.Publisher('ego_vehicle_obs', States, queue_size=10, latch=True)
+        self.publisher_ego_odom = rospy.Publisher('/lgp_car/odometry', Odometry, queue_size=10, latch=True)
         # self.publisher_SRQ = rospy.Publisher('ego_vehicle_vel_bound', States, queue_size=10, latch=True)
 
         # TF Broadcaster
@@ -488,6 +495,38 @@ class MinimalSubscriber:
             marker.pose.orientation = orientation
 
         marker_array.markers.append(marker)
+
+    def add_marker_PV(self, marker_array, marker_type, marker_id, scale, color, points=None, position=None, orientation=None):
+        marker = Marker()
+        marker_collision=Marker()
+        marker_collision.header.frame_id = "map"
+        marker_collision.header.stamp = rospy.Time.now()
+        marker_collision.type = Marker.CYLINDER
+        marker_collision.action = Marker.ADD
+        marker_collision.scale.x = scale[1]*1.414
+        marker_collision.scale.y = scale[1]*1.414
+        marker_collision.scale.z = scale[2]
+        marker_collision.color.r, marker_collision.color.g, marker_collision.color.b, marker_collision.color.a = color
+        marker_collision.id = marker_id + 1000
+        marker.header.frame_id = "map"
+        marker.header.stamp = rospy.Time.now()
+        marker.type = marker_type
+        marker.action = Marker.ADD
+        marker.scale.x, marker.scale.y, marker.scale.z = scale
+        marker.color.r, marker.color.g, marker.color.b, marker.color.a = color
+        marker.id = marker_id
+
+        if points:
+            marker.points.extend(points)
+        if position:
+            marker.pose.position = position
+            marker_collision.pose.position = position
+        if orientation:
+            marker.pose.orientation = orientation
+            marker_collision.pose.orientation = orientation
+
+        marker_array.markers.append(marker)
+        marker_array.markers.append(marker_collision)
      
 
     def add_ev_marker(self, marker_array, marker_type, marker_id, scale, color, points=None, position=None, orientation=None):
@@ -509,6 +548,32 @@ class MinimalSubscriber:
             marker.pose.orientation = orientation
 
         marker_array.markers.append(marker)
+
+    def add_ev_odom(self, odom_msg, marker_type, marker_id, scale, color, points=None, position=None, orientation=None):
+        # marker = Marker()
+        odom = Odometry()
+        odom.header.frame_id = "map"
+        odom.header.stamp = rospy.Time.now()
+        # marker.header.frame_id = "map"
+        # marker.header.stamp = rospy.Time.now()
+
+        # marker.type = marker_type
+        # marker.action = Marker.ADD
+        # marker.scale.x, marker.scale.y, marker.scale.z = scale
+        # marker.color.r, marker.color.g, marker.color.b, marker.color.a = color
+        # marker.id = marker_id
+        
+        # if points:
+            # marker.points.extend(points)
+        if position:
+            odom.pose.pose.position = position
+            # marker.pose.position = position
+        if orientation:
+            odom.pose.pose.orientation = orientation
+            # marker.pose.orientation = orientation
+        odom.twist.twist.linear.x = self.obs[0][2]
+        # marker_array.markers.append(marker)
+        return odom
  
     def create_text_marker(self, marker_id, position, text, color="kblack", scale=1.2):
         marker = Marker()
@@ -579,7 +644,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/oacp/python_env/mesh/t.stl"
+        roof_marker.mesh_resource = "file:///home/zmz/OACP/src/oacp/python_env/mesh/t.stl"
 
         # Position and scale the roof mesh
         roof_marker.pose.position = position
@@ -615,7 +680,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/oacp/python_env/mesh/t.stl"
+        roof_marker.mesh_resource = "file:///home/zmz/OACP/src/oacp/python_env/mesh/t.stl"
 
         # Position and scale the roof mesh
         roof_marker.pose.position = position
@@ -654,7 +719,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/oacp/python_env/mesh/t.stl"
+        roof_marker.mesh_resource = "file:///home/zmz/OACP/src/oacp/python_env/mesh/t.stl"
 
         # Position and scale the roof mesh
         roof_marker.pose.position = position
@@ -694,7 +759,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zack/Documents/ros_ws/OACP_ws/src/oacp/python_env/mesh/tt.stl"
+        roof_marker.mesh_resource = "file:///home/zmz/OACP/src/oacp/python_env/mesh/tt.stl"
         # Position and scale the roof mesh
         roof_marker.pose.position = position
         roof_marker.pose.position.z += 4.0  # Add 2 meters to the Z position (altitude)
@@ -786,57 +851,59 @@ class MinimalSubscriber:
     def publish_markers(self):
         marker_array = MarkerArray()
         marker_array_ev = MarkerArray()
+        marker_array_pv = MarkerArray()
+        odom_msg = Odometry()
         marker_id = 0
         marker_id_ev = 100
         if self.flag == 0: 
             prev = 0 
-            for i in range(self.num_goal):   
-                if i >= len(self.steps):
-                    rospy.logwarn(f"Index {i} is out of range for steps with length {len(self.steps)}.")
-                    continue 
-                points = []
-                for j in range(prev + 1, prev + self.steps[i]):
-                    if j >= len(self.pre_x):
-                        rospy.logwarn(f"Index {j} is out of range for pre_x with length {len(self.pre_x)}.")
-                        continue 
-                    point = Point()
-                    point.x = self.pre_x[j]
-                    # point.y = self.pre_y[j]  # to plot line
-                    point.y = 0  # to plot line
-                    point.z = 0.0
-                    points.append(point) 
-                if i == self.index:
-                    self.add_marker(marker_array, Marker.LINE_STRIP, marker_id, (0.12, 0.12, 0.12), color_map_five["orangeRed"], points)
-                    marker_id += 1
-                    self.add_marker(marker_array, Marker.SPHERE_LIST, marker_id, (0.25, 0.25, 0.25), color_map_five["orangeRed"], points)
-                    marker_id += 1
+            # for i in range(self.num_goal):   
+            #     if i >= len(self.steps):
+            #         rospy.logwarn(f"Index {i} is out of range for steps with length {len(self.steps)}.")
+            #         continue 
+            #     points = []
+            #     for j in range(prev + 1, prev + self.steps[i]):
+            #         if j >= len(self.pre_x):
+            #             rospy.logwarn(f"Index {j} is out of range for pre_x with length {len(self.pre_x)}.")
+            #             continue 
+            #         point = Point()
+            #         point.x = self.pre_x[j]
+            #         # point.y = self.pre_y[j]  # to plot line
+            #         point.y = 0  # to plot line
+            #         point.z = 0.0
+            #         points.append(point) 
+            #     if i == self.index:
+            #         self.add_marker(marker_array, Marker.LINE_STRIP, marker_id, (0.12, 0.12, 0.12), color_map_five["orangeRed"], points)
+            #         marker_id += 1
+            #         self.add_marker(marker_array, Marker.SPHERE_LIST, marker_id, (0.25, 0.25, 0.25), color_map_five["orangeRed"], points)
+            #         marker_id += 1
 
-                    endpoint_pose = Point()
-                    endpoint_pose.x = self.pre_x[prev + self.steps[i] - 1]
-                    endpoint_pose.y = self.pre_y[prev + self.steps[i] - 1]
-                    endpoint_pose.z = 0.0
-                    self.add_marker(marker_array, Marker.SPHERE, marker_id, (0.5, 0.5, 0.5),  color_map_five["orangeRed"], position=endpoint_pose)
-                    marker_id += 1
+            #         endpoint_pose = Point()
+            #         endpoint_pose.x = self.pre_x[prev + self.steps[i] - 1]
+            #         endpoint_pose.y = self.pre_y[prev + self.steps[i] - 1]
+            #         endpoint_pose.z = 0.0
+            #         self.add_marker(marker_array, Marker.SPHERE, marker_id, (0.5, 0.5, 0.5),  color_map_five["orangeRed"], position=endpoint_pose)
+            #         marker_id += 1
 
-                    # arrow_start = Point()
-                    # arrow_start.x = self.pre_x[prev + 0]
-                    # arrow_start.y = self.pre_y[prev + 0]
-                    # arrow_start.z = 0.0
+            #         # arrow_start = Point()
+            #         # arrow_start.x = self.pre_x[prev + 0]
+            #         # arrow_start.y = self.pre_y[prev + 0]
+            #         # arrow_start.z = 0.0
 
-                    # arrow_end = Point()
-                    # arrow_end.x = self.pre_x[prev + 0] + self.obs[0][2]
-                    # arrow_end.y = self.pre_y[prev + 0] + self.obs[0][3]
-                    # arrow_end.z = 0.0
-                    # #  # Define the scale for the arrowhead
-                    # # arrowhead_scale = (0.2, 1.0, 1.0)  # (shaft diameter, head diameter, head length)
-                    # self.add_marker(marker_array, Marker.ARROW, marker_id, (0.2, 0.5, 1.618), color_map_five["vscodeblue"], [arrow_start, arrow_end])
-                    # marker_id += 1
-                else:
-                    self.add_marker(marker_array, Marker.LINE_STRIP, marker_id, (0.12, 0.12, 0.12), color_map_five["purple_black"], points)
-                    marker_id += 1   
-                    self.add_marker(marker_array, Marker.SPHERE_LIST, marker_id, (0.25, 0.25, 0.25), color_map_five["purple_black"], points)
-                    marker_id += 1
-                prev += self.steps[i]
+            #         # arrow_end = Point()
+            #         # arrow_end.x = self.pre_x[prev + 0] + self.obs[0][2]
+            #         # arrow_end.y = self.pre_y[prev + 0] + self.obs[0][3]
+            #         # arrow_end.z = 0.0
+            #         # #  # Define the scale for the arrowhead
+            #         # # arrowhead_scale = (0.2, 1.0, 1.0)  # (shaft diameter, head diameter, head length)
+            #         # self.add_marker(marker_array, Marker.ARROW, marker_id, (0.2, 0.5, 1.618), color_map_five["vscodeblue"], [arrow_start, arrow_end])
+            #         # marker_id += 1
+            #     else:
+            #         self.add_marker(marker_array, Marker.LINE_STRIP, marker_id, (0.12, 0.12, 0.12), color_map_five["purple_black"], points)
+            #         marker_id += 1   
+            #         self.add_marker(marker_array, Marker.SPHERE_LIST, marker_id, (0.25, 0.25, 0.25), color_map_five["purple_black"], points)
+            #         marker_id += 1
+            #     prev += self.steps[i]
 
             diag = np.sqrt(self.a_rect ** 2 + self.b_rect ** 2)
             for i, vehicle in enumerate(self.obs[1:]):
@@ -862,6 +929,7 @@ class MinimalSubscriber:
                 # Add the marker with the adjusted color
                 # self.add_marker(marker_array, Marker.CUBE, marker_id, (4.0, 1.4, 1.2), color_with_transparency, position=position, orientation=orientation)
                 self.add_marker(marker_array, Marker.CUBE, marker_id, (1.4, 4.0, 1.2), color_with_transparency, position=position, orientation=orientation)
+                self.add_marker_PV(marker_array_pv, Marker.CUBE, marker_id, (1.4, 4.0, 1.2), color_with_transparency, position=position, orientation=orientation)
                 marker_id += 1
                 
                 # Create a text marker for the velocity
@@ -885,6 +953,7 @@ class MinimalSubscriber:
                 color = color_map_five["blue"]
                 # self.add_marker(marker_array, Marker.CUBE, marker_id, (4.0, 1.4, 1.2), color, position=position, orientation=orientation)
                 self.add_marker(marker_array, Marker.CUBE, marker_id, (1.4, 4.0, 1.2), color, position=position, orientation=orientation)
+                self.add_marker_PV(marker_array_pv, Marker.CUBE, marker_id, (1.4, 4.0, 1.2), color, position=position, orientation=orientation)
                 marker_id += 1
                 # Create a text marker for the velocity
                 velocity = np.sqrt(vehicle[2]**2 + vehicle[3]**2 )  #  
@@ -903,11 +972,15 @@ class MinimalSubscriber:
             robot_position.y = 0
             robot_position.z = 0.5
 
-            robot_orientation = Quaternion()
-            robot_orientation.z = np.sin(self.psi / 2)
-            robot_orientation.w = np.cos(self.psi / 2)
-            robot_orientation.z = np.sin(0)
-            robot_orientation.w = np.cos(0)
+            robot_orientation = Quaternion(*quaternion_from_euler(0, 0, self.psi))
+            # robot_orientation.z = np.sin(self.psi / 2)
+            # robot_orientation.w = np.cos(self.psi / 2)
+            # robot_orientation.z = np.sin(0)
+            # robot_orientation.w = np.cos(0)
+            # robot_orientation.y = np.sin(0)
+            # robot_orientation.x = np.cos(0)
+            # robot_orientation=quaternion_from_euler(0, 0, self.psi)
+            # print("robot_orientation: ", robot_orientation)
 
             self.add_ev_marker(marker_array_ev, Marker.CYLINDER, marker_id_ev, (self.a_ell, self.b_ell, 1.0), (1.0, 102/255, 102/255, 0.2), position=robot_position, orientation=robot_orientation)
             marker_id_ev += 1
@@ -915,10 +988,11 @@ class MinimalSubscriber:
             position = Point() 
             position.x = self.obs[0][0]
             position.y = self.obs[0][1]
-            position.y = 0
+            # position.y = 0
             position.z = 0.5
 
             self.add_ev_marker(marker_array_ev, Marker.CUBE, marker_id_ev, (4.0, 1.4, 1.2), color_map_five[ "red"], position=position, orientation=robot_orientation)
+            odom_msg=self.add_ev_odom(odom_msg, Marker.CUBE, marker_id_ev, (4.0, 1.4, 1.2), color_map_five[ "red"], position=position, orientation=robot_orientation)
             marker_id_ev += 1
 
             # Create a text marker for the  EV  velocity 
@@ -936,6 +1010,8 @@ class MinimalSubscriber:
             self.publisher_markers.publish(marker_array)
             self.publisher_ev_markers.publish(marker_array_ev) 
             self.publisher_markers.publish(self.marker_array_static) 
+            self.publisher_pv_markers.publish(marker_array_pv)
+            self.publisher_ego_odom.publish(odom_msg)
     def IDM(self): 
         so = 3
         T = 1 
@@ -1111,11 +1187,37 @@ class MinimalSubscriber:
         self.num_goal = msg.goals
         self.index = msg.index
     
+    def listener_callback2(self, msg): 
+        self.Gotit = 1 
+        self.v = msg.linear.x
+        self.w = msg.angular.z
+        # print("v: ", self.v, "w: ", self.w)
+        # self.jx = msg.jx
+        # self.jy = msg.jy   
+        # cnt = 0
+        self.steps = []
+        self.pre_x = [] 
+        self.pre_y = [] 
+        # for i in msg.batch.poses:
+        #     self.pre_x.append(i.position.x)
+        #     self.pre_y.append(i.position.y)
+        #     if abs(i.position.x - self.pre_x[0]) < 0.001 and len(self.pre_x) > 1:
+        #         self.steps.append(cnt)
+        #         cnt = 0
+        #     cnt+=1
+        # self.steps.append(cnt)
+        # print("received msg")  
+      
+        # self.num_goal = msg.goals
+        # self.index = msg.index
+
     def timer_callback(self, event):
         # rospy.loginfo("Timer callback triggered")
         # rospy.loginfo(f"Current obs value: {self.obs}")
         # if (self.obs[0][0] < 28000 and self.setting == 2) or (self.obs[0][0] < 28000 and self.setting == 1) or (self.obs[0][0] < 28000 and self.setting == 4) or (self.obs[0][0] < 25010 and self.setting == 0) or (self.obs[0][0] < 25000 and self.NGSIM == True):#self.obs[0][1] >= -8.0-0.7:#self.obs[0][0] < 5010:#self.obs[0][1] >= -8.0-0.7:#self.obs[0][0] < 5010 or self.obs[0][1] >= -10:
- 
+        if(not self.first_refresh):
+            self.publish_markers()
+            self.first_refresh = True
         if self.Gotit or self.flag:
                 t1 = time()
                 dt = self.dt
@@ -1128,11 +1230,16 @@ class MinimalSubscriber:
                 self.loop += 1
                 self.sim_time = np.append(self.sim_time, self.loop * dt)
                 if self.Gotit: 
-                    self.psi += self.w * dt
+                    # self.psi += self.w * dt
+                    self.psi=0
+                    print("psi: ", self.psi)
                     self.obs[0][2] = self.v * np.cos(self.psi)    #vx
                     self.obs[0][3] = self.v * np.sin(self.psi)    #vy
+                    print("gotit: ", self.Gotit, "v: ", self.v, "w: ", self.w)
+                    print("obs: ", self.obs[0][2], self.obs[0][3])
                     self.obs[0][0] += self.obs[0][2] * dt    #x
                     self.obs[0][1] += self.obs[0][3] * dt    #y
+                    print("obs: ", self.obs[0][0], self.obs[0][1])
                     self.former_obs.append([self.obs[0][0], self.obs[0][1], self.obs[0][2], self.obs[0][3]])
 
                     if self.NGSIM == False: 
