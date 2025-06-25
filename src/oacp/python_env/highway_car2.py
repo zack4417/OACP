@@ -644,7 +644,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zmz/OACP/src/oacp/python_env/mesh/t.stl"
+        roof_marker.mesh_resource = "file:///home/zmz/ros_ws/src/oacp/python_env/mesh/t.stl"
 
         # Position and scale the roof mesh
         roof_marker.pose.position = position
@@ -680,7 +680,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zmz/OACP/src/oacp/python_env/mesh/t.stl"
+        roof_marker.mesh_resource = "file:///home/zmz/ros_ws/src/oacp/python_env/mesh/t.stl"
 
         # Position and scale the roof mesh
         roof_marker.pose.position = position
@@ -719,7 +719,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zmz/OACP/src/oacp/python_env/mesh/t.stl"
+        roof_marker.mesh_resource = "file:///home/zmz/ros_ws/src/oacp/python_env/mesh/t.stl"
 
         # Position and scale the roof mesh
         roof_marker.pose.position = position
@@ -759,7 +759,7 @@ class MinimalSubscriber:
         roof_marker.color = color_msg
 
         # Path to your 3D mesh file
-        roof_marker.mesh_resource = "file:///home/zmz/OACP/src/oacp/python_env/mesh/tt.stl"
+        roof_marker.mesh_resource = "file:///home/zmz/ros_ws/src/oacp/python_env/mesh/tt.stl"
         # Position and scale the roof mesh
         roof_marker.pose.position = position
         roof_marker.pose.position.z += 4.0  # Add 2 meters to the Z position (altitude)
