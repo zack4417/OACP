@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 Repository for the paper:  
-**"Occlusion-Aware Contingency Safety-Critical Planning for Autonomous Driving"**
+**"Occlusion-Aware Contingency Safety-Critical Planning for Autonomous Vehicles"**
 
 ## Features
 - Real-time contingency planning for autonomous vehicles in occluded environments
@@ -17,7 +17,7 @@ Repository for the paper:
 If you use this code in your research, please cite:
 ```bibtex
 @article{zheng2025safe,
-  title={Occlusion-Aware Contingency Safety-Critical Planning for Autonomous Driving},
+  title={Occlusion-Aware Contingency Safety-Critical Planning for Autonomous Vehicles},
   author={Zheng, Lei and Yang, Rui and Zheng, Minzhe and Peng, Zengqi and Wang, Michael Yu and Ma, Jun},
   journal={arXiv preprint arXiv:2502.06359},
   year={2025}
