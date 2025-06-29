@@ -10,13 +10,13 @@ Repository for the paper:
 - Real-time contingency planning for autonomous vehicles in occluded environments
 - Parallel consensus optimization framework
 - Highway driving simulator with configurable scenarios
-- Support for both synthetic IDM-based obstacles and real-world NGSIM trajectories
+- Support for synthetic IDM-based obstacles 
 - ROS-based implementation for easy integration
 
 ## Citation
 If you use this code in your research, please cite:
 ```bibtex
-@article{zheng2024safe,
+@article{zheng2025safe,
   title={Occlusion-Aware Contingency Safety-Critical Planning for Autonomous Driving},
   author={Zheng, Lei and Yang, Rui and Zheng, Minzhe and Peng, Zengqi and Wang, Michael Yu and Ma, Jun},
   journal={arXiv preprint arXiv:2502.06359},
@@ -64,8 +64,7 @@ Modify `config.yaml` to set your scenario:
 ```yaml
 setting: "OCC_IDM"  # Available options:
                     #   "OCC_IDM" - Occlusion-aware intersection driving
-                    #   "Racing_IDM" - High-speed racing scenario
-                    #   "NGSIM" - Real-world trajectory replay
+ 
 obstacles: "dynamic" # "static" or "dynamic"
 num_obs: 4         # Number of obstacles
 delta_time: 0.1    # Simulation timestep
@@ -75,16 +74,21 @@ delta_time: 0.1    # Simulation timestep
 Terminal 1 (Planning Node):
 ```bash
 source devel/setup.bash
+roscore
+```
+Terminal 2 (Planning Node):
+```bash
+source devel/setup.bash
 rosrun oacp oacp_node
 ```
 
-Terminal 2 (Simulator):
+Terminal 3 (Simulator):
 ```bash
 source devel/setup.bash
 rosrun oacp highway_car2.py
 ```
 
-Terminal 3 (Visualization):
+Terminal 4 (Visualization):
 ```bash
 source devel/setup.bash
 rosrun rviz rviz -d src/config.rviz 
