@@ -9,8 +9,7 @@ Repository for the paper:
 ## Project Website
 Explore our interactive project portal for comprehensive resources:
 - **Project Overview**: Detailed methodology and technical approach
-- **Simulation Videos**: Real-time demonstrations of occlusion-aware planning 
-Visit: [https://zack4417.github.io/oacp-website/](https://zack4417.github.io/oacp-website/)
+- **Videos**: Real-time demonstrations of occlusion-aware planning  [https://zack4417.github.io/oacp-website/](https://zack4417.github.io/oacp-website/)
 
 ## Features
 - Real-time contingency planning for autonomous vehicles in occluded environments
