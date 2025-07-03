@@ -21,8 +21,7 @@ from visualization_msgs.msg import Marker, MarkerArray
 from geometry_msgs.msg import Point, Quaternion, Twist, Vector3, TransformStamped
 from oacp.msg import States, Controls  
 from tf.transformations import quaternion_from_euler
-
-
+ 
 COLOR_RGB_MAP = {
   'black':      np.array([0, 0, 0]) / 255.,
   'white':      np.array([255, 255, 255]) / 255.,
