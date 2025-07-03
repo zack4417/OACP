@@ -5,10 +5,12 @@
 
 Repository for the paper:  
 **"Occlusion-Aware Contingency Safety-Critical Planning for Autonomous Vehicles"**
-
-
-## Features
-https://zack4417.github.io/oacp-website/
+ 
+## Project Website
+Explore our interactive project portal for comprehensive resources:
+- **Project Overview**: Detailed methodology and technical approach
+- **Simulation Videos**: Real-time demonstrations of occlusion-aware planning 
+Visit: [https://zack4417.github.io/oacp-website/](https://zack4417.github.io/oacp-website/)
 
 ## Features
 - Real-time contingency planning for autonomous vehicles in occluded environments
