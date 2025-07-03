@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
 
 Repository of baseline experiment for the paper:
-**"Safe and Real-Time Consistent Planning for Autonomous Vehicles in Partially Observed Environments via Parallel Consensus Optimization"**
+**"Occlusion-Aware Contingency Planning for Autonomous Vehicles"**
 
 ## Control-Tree Optimization 
 For details of Control-Tree Optimization, please refer to the paper: 
@@ -35,9 +35,6 @@ C. Phiquepal and M. Toussaint, “Control-Tree Optimization: an approach to MPC 
   - [ROS Noetic](http://wiki.ros.org/noetic/Installation)
   - [Eigen QuadProg](https://github.com/jrl-umi3218/eigen-quadprog)
   - Python 3.8+
-- **Datasets:**
-
-  - [NGSIM I-80 Dataset](https://drive.google.com/drive/folders/1cgsOWnc4JTeyNdBN6Fjef2-J5HqjnWyX?usp=sharing)
 
   ```bash
   # Place downloaded files in:
@@ -80,11 +77,9 @@ Modify `config.yaml` to set your scenario:
 ```yaml
 setting: "OCC_IDM"  # Available options:
                     #   "OCC_IDM" - Occlusion-aware intersection driving
-                    #   "Racing_IDM" - High-speed racing scenario
-                    #   "NGSIM" - Real-world trajectory replay
 obstacles: "dynamic" # "static" or "dynamic"
-num_obs: 5          # Number of obstacles
-delta_time: 0.05    # Simulation timestep
+num_obs: 4          # Number of obstacles
+delta_time: 0.1    # Simulation timestep
 ```
 
 ## Usage
